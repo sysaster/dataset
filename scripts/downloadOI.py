@@ -21,10 +21,13 @@ parser.add_argument("--truncated", help="Include truncated images", required=Fal
 parser.add_argument("--groupOf", help="Include groupOf images", required=False, type=int, default=1)
 parser.add_argument("--depiction", help="Include depiction images", required=False, type=int, default=1)
 parser.add_argument("--inside", help="Include inside images", required=False, type=int, default=1)
+parser.add_argument("--files", help="Include path of files", required=True)
+
 
 args = parser.parse_args()
 
 run_mode = args.mode
+files_path = args.files
 
 threads = args.nthreads
 
@@ -32,7 +35,7 @@ classes = []
 for class_name in args.classes.split(','):
     classes.append(class_name)
 
-with open('./class-descriptions-boxable.csv', mode='r') as infile:
+with open(files_path + '/class-descriptions-boxable.csv', mode='r') as infile:
     reader = csv.reader(infile)
     dict_list = {rows[1]:rows[0] for rows in reader}
 
@@ -50,7 +53,7 @@ for ind in range(0, len(classes)):
     
     subprocess.run([ 'mkdir', run_mode+'/'+class_name])
 
-    command = "grep "+dict_list[class_name.replace('_', ' ')] + " ./" + run_mode + "-annotations-bbox.csv"
+    command = "grep "+dict_list[class_name.replace('_',' ')] + " " + files_path + "/" + run_mode + "-annotations-bbox.csv"
     class_annotations = subprocess.run(command.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
     class_annotations = class_annotations.splitlines()
 
@@ -91,6 +94,3 @@ list(tqdm(pool.imap(os.system, commands), total = len(commands) ))
 
 pool.close()
 pool.join()
-
-
-
